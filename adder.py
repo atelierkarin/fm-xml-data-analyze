@@ -1,3 +1,4 @@
+import sys
 import pandas as pd
 
 import firebase_admin
@@ -6,34 +7,49 @@ from firebase_admin import firestore
 
 from playerData import genPlayerData
 
+from datetime import datetime
+
 cred = credentials.Certificate("fm-j-league-pack-firebase-adminsdk-h2qyn-6574551878.json")
 firebase_admin.initialize_app(cred)
 
-df = pd.read_csv('regional.csv', encoding='utf_8_sig')
+args = sys.argv
 
-db = firestore.client()
+if len(args) < 2:
+  print('You need to provide filename!')
+else:
+  df = pd.read_csv(args[1], encoding='utf_8_sig')
 
-for index, row in df.iterrows():
+  db = firestore.client()
 
-  # Skip retired person
-  if row['person_type'] == 5:
-    continue
+  for index, row in df.iterrows():
+    # Skip retired person
+    if row['person_type'] == 5:
+      continue
 
-  playerData = genPlayerData(row, "新規選手 地域1.fmf")
+    # Skip player not club id if provide
+    skip_club = args[2]
+    if skip_club is not None:
+      if row['club'] != row['club'] or not int(row['club']) == int(skip_club):
+        continue
 
-  firestore_id = None
+    playerData = genPlayerData(row, "新規選手 地域1.fmf")
 
-  query = db.collection('playerDb').where('player.basicInfo.name', '==', row['common_name'])
-  docs = query.stream()
-  
-  for doc in docs:
-    firestore_id = doc.id
+    firestore_id = None
 
-  if firestore_id == None:
-    doc_ref = db.collection(u'playerDb').document()
-    new_id = doc_ref.id
-    add_data = {'id': new_id, 'player': playerData}
-    db.collection(u'playerDb').document(new_id).set(add_data)
-    print(row['common_name'] + " ADDED.")
-  else:
-    print(row['common_name'] + " SKIPPED.")
+    query = db.collection('playerDb').where('player.basicInfo.name', '==', row['common_name'])
+    docs = query.stream()
+    
+    for doc in docs:
+      firestore_id = doc.id
+
+    if firestore_id == None:
+      doc_ref = db.collection(u'playerDb').document()
+      new_id = doc_ref.id
+      add_data = {'id': new_id, 'player': playerData}
+      db.collection(u'playerDb').document(new_id).set(add_data)
+      print(row['common_name'] + " ADDED.")
+    else:
+      playerData["basicInfo"]["updateDate"] = datetime.today().strftime('%Y-%m-%d %H:%M:%S')
+      update_data = {'id': firestore_id, 'player': playerData}
+      db.collection(u'playerDb').document(firestore_id).set(update_data)
+      print(row['common_name'] + " UPDATED.")
