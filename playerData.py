@@ -14,10 +14,18 @@ def formatNumber(v, defaultValue = None):
     return int(v)
 
 def isPlayer(p):
-  return not isEmpty(p['ca']) or not isEmpty(p['pa']) or p['person_type'] == 1 or not isNonPlayer(p)
+  if not isEmpty(p['clubJob']):
+    player_types = getPlayerType(int(p['clubJob']))
+    return player_types is not None and 0 in player_types
+  else:
+    return not isEmpty(p['ca']) or not isEmpty(p['pa']) or p['person_type'] == 1 or not isNonPlayer(p)
 
 def isNonPlayer(p):
-  return not isEmpty(p['staffCa']) or p['person_type'] == 2 or p['person_type'] == 3
+  if not isEmpty(p['clubJob']):
+    player_types = getPlayerType(int(p['clubJob']))
+    return player_types is None or any(y > 0 for y in player_types)
+  else:
+    return not isEmpty(p['staffCa']) or p['person_type'] == 2 or p['person_type'] == 3
 
 def formatObject(o):
   formattedValue = {k: v for k, v in o.items() if v is not None}
