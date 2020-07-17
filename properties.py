@@ -402,5 +402,21 @@ properties = [
   {
     "id": 1315466610,
     "name": "staffWorldReputation"
-  }
+  },
+  {
+    "id": 1347183468,
+    "name": "loanClub"
+  },
+  {
+    "id": 1347187556,
+    "name": "loanDateStart"
+  },
+  {
+    "id": 1347183972,
+    "name": "loanDateEnd"
+  },
+  {
+    "id": 1347187566,
+    "name": "loanSquardNumber"
+  },
 ]

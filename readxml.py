@@ -1,16 +1,20 @@
 import sys
 import pandas as pd
+import argparse
+
 from reader import read_xml
 from properties import properties
 
 import numpy as np
 
-args = sys.argv
+parser = argparse.ArgumentParser()
+parser.add_argument("filename", help="Filename of exported xml file (From FM manager)", type=str)
+args = parser.parse_args()
 
-if len(args) < 2:
+if not hasattr(args, 'filename'):
   print('You need to provide filename!')
 else:
-  filename = args[1]
+  filename = args.filename
   data = read_xml(filename)
   header = ["version"].append([p["name"] for p in properties])
   df = pd.DataFrame.from_dict(data, orient='index', columns=header)

@@ -61,6 +61,18 @@ def getClubInfo(player):
 
     return clubInfo
 
+def getLoanInfo(player):
+  if not 'loanClub' in player or isEmpty(player['loanClub']):
+    return None
+  else:
+    loanInfo = {}
+    loanInfo['id'] = int(player['loanClub'])
+    loanInfo['dateStart'] = player['loanDateStart']
+    loanInfo['dateEnd'] = player['loanDateEnd']
+    if not isEmpty(player['loanSquardNumber']): loanInfo['squardNumber'] = int(player['loanSquardNumber'])
+
+    return loanInfo
+
 def getPersonalData(player):
   personalData = {}
 
@@ -217,6 +229,9 @@ def genPlayerData(p, datafileType="新規選手.fmf"):
   player['location'] = getPlayerLocation(p, datafileType)
   player['basicInfo'] = getBasicInfo(p)
   player['clubInfo'] = getClubInfo(p)
+
+  loanInfo = getLoanInfo(p)
+  if loanInfo != None: player['loanInfo'] = loanInfo
 
   personalData = getPersonalData(p)
   if personalData != None: player['personalData'] = personalData
